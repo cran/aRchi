@@ -24,7 +24,7 @@
 #'
 #'  "branch": return the characteristics for the cylinders of the branch selected. A branch is similar to an axis but regroup also everything that is upstream the axis (i.e all that the axis carries)
 #'
-#'  "Subtree": return the characteristics for the cylinders of the subtree selected. A subtree is similar to a branch but starting from the cylinder selected and not from the point of insertion of the selected axis. In other word, when the user draw a rectangle on a cylinder, the subtree selection return all that the cylinder carries. If several cylinders are selected, the subtree selection return all that the most downstream cylinder carries.
+#'  "subtree": return the characteristics for the cylinders of the subtree selected. A subtree is similar to a branch but starting from the cylinder selected and not from the point of insertion of the selected axis. In other word, when the user draw a rectangle on a cylinder, the subtree selection return all that the cylinder carries. If several cylinders are selected, the subtree selection return all that the most downstream cylinder carries.
 #' @examples
 #' # Read an aRchi file with at least a QSM
 #' if(interactive()){
@@ -54,6 +54,10 @@ setMethod("SelectinQSM_3d",
             axis_ID=cyl_ID=startX=startY=startZ=endX=endY=endZ=segment_ID=node_ID=parent_ID=radius=axis_ID=ID_Path=NULL
 
             QSM=aRchi@QSM
+            if(level %in% c("subtree","branch", "cylinder","segment","node","axis")==FALSE) stop("Incorrect level argument")
+            if(class(aRchi) != "aRchi") stop("The provided data is not of class aRchi")
+            if(is.null(aRchi@QSM)) stop("The archi file does not contains a QSM")
+
             if(level%in%c("branch","subtree")){
               Paths=aRchi@Paths
               if(is.null(Paths)){stop("Paths are needed for branch or subtree level. Please run Make_Path() on your object aRchi before selecting a branch or subtree in 3d.")}
@@ -75,17 +79,17 @@ setMethod("SelectinQSM_3d",
 
 
             if (interactive()) {
-              pc=QSM[startX==min(startX)|startX==max(endX)|startY==min(startY)|startY==max(endY)|startZ==min(startZ)|startZ==max(endZ),1:3]
+              pc=QSM[startX==min(startX)|startX==max(endX)|startY==min(startY)|startY==max(endY)|startZ==min(startZ)|startZ==max(endZ),c("startX","startY","startZ")]
               names(pc)=c("X","Y","Z")
               pc = pkgcond::suppress_messages( lidR::LAS(pc)) # pkgcond::supress_messages removes messages from the LAS building
-              lidR::plot(pc,bg="black",colorPalette="black",size=0,clear_artifacts=FALSE,axis=T)
+              lidR::plot(pc,bg="black",size=0,clear_artifacts=FALSE,axis=T)
               ifelse(skeleton,rgl::segments3d(dat_plot,lwd=3,col="white",add=TRUE), rgl::shapelist3d(dat_plot,color="white",alpha=1,add=TRUE,lit=TRUE))
 
               valid=gtools::ask("Find and Zoom into the zone of interest, then, hit Enter:\n")
               cat("Now select the zone of interest by drawing a rectangle.\n")
               f <- rgl::select3d()
               if (!is.null(f)) {
-                keep <- which(f(QSM[,1:3]))
+                keep <- which(f(QSM[,c("startX","startY","startZ")]))
                 if(length(keep)==0){
                   QSM$axisX=QSM$endX-QSM$startX
                   QSM$axisY=QSM$endY-QSM$startY

@@ -120,10 +120,12 @@ setMethod("Truncate_QSM",
             if(is.null(aRchi@QSM$Mf)==FALSE){TruncatedQSM=TruncatedQSM[,-c("sub_tree_biomass","Mf","Mf_r")]}
 
             aRchi@QSM=TruncatedQSM
+            if(length(unique(aRchi@QSM$branching_order)>1)){
             aRchi=Make_Path(aRchi)
-            message("\nPaths table has been re-estimated according to the new truncated QSM")
+            message("\nPaths table has been re-estimated according to the new truncated QSM")}
+            if(length(unique(aRchi@QSM$branching_order)==1)){aRchi@Paths=NULL}
             if(is.null(aRchi@Nodes)==FALSE){
-              Make_Node(aRchi)
+              aRchi=Make_Node(aRchi)
 
               message("\nNodes table has been re-estimated according to the new truncated QSM")
             }
@@ -134,7 +136,7 @@ setMethod("Truncate_QSM",
               names(pc)=c("X","Y","Z")
               pc = pkgcond::suppress_messages( lidR::LAS(pc)) # pkgcond::supress_messages removes messages from the LAS building
 
-              lidR::plot(pc,bg="black",colorPalette="black",size=0,clear_artifacts=FALSE,axis=T)
+              lidR::plot(pc,bg="black",size=0,clear_artifacts=FALSE,axis=T)
 
               ls_cyl=plyr::alply(TruncatedQSM,1,function(x){rgl::cylinder3d(rbind(as.matrix(x[,c("startX","startY","startZ")]),as.matrix(x[,c("endX","endY","endZ")])),radius= x[,"radius_cyl"][[1]],sides=8,closed=-2)}) # a list of cylinder
               rgl::shapelist3d(ls_cyl,color=2,alpha=1,add=TRUE,lit=TRUE) # plot the list
