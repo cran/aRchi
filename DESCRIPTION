@@ -2,7 +2,7 @@ Package: aRchi
 Type: Package
 Title: Quantitative Structural Model ('QSM') Treatment for Tree
         Architecture
-Version: 2.1.0
+Version: 2.1.2
 Author: Olivier Martin and Bastien Lecigne
 Maintainer: Olivier Martin <oli.martin@ntymail.com>
 Description: Provides a set of tools to make quantitative structural model of trees (i.e the so-called 'QSM') from LiDAR point cloud, to manipulate and visualize the QSMs as well as to compute metrics from them. It can be used in various context of forest ecology (i.e biomass estimation) and tree architecture (i.e architectural metrics), see Martin-Ducup et al. (2020) <doi:10.1111/1365-2435.13678>. The package is based on a new S4 class called 'aRchi'.
@@ -12,7 +12,7 @@ URL: https://github.com/umr-amap/aRchi
 RoxygenNote: 7.1.1
 Imports: data.table, dplyr, plyr, rgl, methods, lidR, FNN, DiceKriging,
         stringr, utils, stats, progress, gtools, Rfast, VoxR,
-        fastcluster, pracma, pkgcond, svMisc, circular
+        fastcluster, pracma, pkgcond, R.matlab, svMisc, circular
 Collate: 'nullOrnumeric.R' 'nullOrlist.R' 'nullOrLASOrDatatable.R'
         'nullOrDatatable.R' 'aRchiClass.R' 'BranchAngle.R'
         'Compute_A0.R' 'Compute_Mf.R' 'DAI.R' 'ForkRate.R'
@@ -28,6 +28,6 @@ Collate: 'nullOrnumeric.R' 'nullOrlist.R' 'nullOrLASOrDatatable.R'
         'segment_annual_shoots.R' 'simplify_skeleton.R' 'skeletonize.R'
         'smooth_skeleton.R' 'write_aRchi.R'
 NeedsCompilation: no
-Packaged: 2022-04-12 17:37:44 UTC; omartin
+Packaged: 2022-08-07 11:45:45 UTC; omartin
 Repository: CRAN
-Date/Publication: 2022-04-12 18:52:35 UTC
+Date/Publication: 2022-08-07 14:30:05 UTC

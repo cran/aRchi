@@ -38,7 +38,7 @@ setMethod("plot",
 
 
             # make sure the data is an aRchi file and contains a QSM
-            if(class(x) != "aRchi") stop("The provided data is not of class aRchi")
+            if(inherits(x,"aRchi")==F) stop("The provided data is not of class aRchi")
             if(is.null(x@QSM)) stop("This aRchi file does not contains a QSM")
             if(skeleton){
               skel = x@QSM
@@ -106,11 +106,11 @@ setMethod("plot",
               if(is.null(x@pointcloud)){warning("There is no point cloud to plot")}
               lidR::plot(x@pointcloud,bg=bg,clear_artifacts=FALSE,axis=T) #plot the point cloud
             }else{
-              # empty window
+              # empty window. to check
               pc=QSM[startX==min(startX)|startX==max(startX)|startY==min(startY)|startY==max(startY)|startZ==min(startZ)|startZ==max(startZ),1:3]
               names(pc)=c("X","Y","Z")
               pc = pkgcond::suppress_messages( lidR::LAS(pc)) # pkgcond::supress_messages removes messages from the LAS building
-              lidR::plot(pc,bg=bg,size=0,clear_artifacts=FALSE,axis=T)
+              lidR::plot(pc,bg=bg,size=0,clear_artifacts=FALSE,axis=T,pal=palette.colors(n=1,alpha=0))
             }
             #rgl::shapelist3d(ls_cyl,color=col,alpha=transparency,add=TRUE,lit=lit) # plot the list
             rgl::shade3d(mesh,col=rep(col,each=32))

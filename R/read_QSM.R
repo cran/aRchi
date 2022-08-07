@@ -1,12 +1,12 @@
 #' Read a QSM
 #'
 #' @description Read a QSM file generated with treeQSM, simpletree, simpleforest or pypetree.
-#' @param file The directory to the QSM file path
+#' @param file The directory to the QSM file path.
 #' @param model \code{treeQSM}, \code{simpletree}, \code{simpleforest} or \code{pypetree} depending on the algorithm used to generate the QSM
 #' @return  a list containing a data.table with the QSM and a character with the model name. This list can be used to build an aRchi object (see function \code{\link{build_aRchi}})
 #' @seealso \code{\link{aRchi}} the aRchi class;\code{\link{build_aRchi}} to build an object of class \code{aRchi}
 #' @details
-#' For \code{treeQSM} model, please respect the format with column order provided in the last version <https://github.com/InverseTampere/TreeQSM/blob/master/README.md>
+#' For \code{treeQSM} model, .mat from treeQSM are allowed. the old format (V2.3) as well as the new format (V2.4) are allowed.
 #' @include aRchiClass.R
 #' @examples
 #' file=system.file("extdata","Tree_1_TreeQSM.txt",package = "aRchi")
@@ -15,10 +15,36 @@
 read_QSM=function(file,model){
   parent_ID=extension_ID=cyl_ID=branch_ID=PositionInBranch_ID=parentID=radius=rad1=rad2=axis_ID=NULL
 
-  data=data.table::fread(file)
+
 
   if(model=="treeQSM"){
-  data.table::setnames(data,c("radius","length","startX","startY","startZ","axisX","axisY","axisZ","parent_ID","extension_ID","added","UnmodRadius","branch_ID","BranchOrder","PositionInBranch_ID"))
+    if(stringr::str_detect(file,".mat")){
+      mat=R.matlab::readMat(file)
+
+      if(is.null(mat$OptQSM)){
+        if(is.null(mat$QSM)){
+          warning("No QSM found")}else{
+
+
+            warning(paste0(ncol(mat$QSM[,,]), " QSMs were found. The first one only is used. Please use select_optimum function of treeQSM matlab algorithm if you want to get the optimal QSM"))
+            cylinder=mat$QSM[,,1]$cylinder
+            data=data.table::data.table(cbind(cylinder[,,]$radius,cylinder[,,]$length,cylinder[,,]$start,cylinder[,,]$axis,cylinder[,,]$parent,cylinder[,,]$extension,cylinder[,,]$added,cylinder[,,]$UnmodRadius,cylinder[,,]$branch,cylinder[,,]$BranchOrder,cylinder[,,]$PositionInBranch))
+            data.table::setnames(data,c("radius","length","startX","startY","startZ","axisX","axisY","axisZ","parent_ID","extension_ID","added","UnmodRadius","branch_ID","BranchOrder","PositionInBranch_ID"))
+
+          }
+      }else{
+        cylinder=mat$OptQSM[,,]$cylinder
+        data=data.table(cbind(cylinder[,,]$radius,cylinder[,,]$length,cylinder[,,]$start,cylinder[,,]$axis,cylinder[,,]$parent,cylinder[,,]$extension,cylinder[,,]$added,cylinder[,,]$UnmodRadius,cylinder[,,]$branch,cylinder[,,]$BranchOrder,cylinder[,,]$PositionInBranch))
+        data.table::setnames(data,c("radius","length","startX","startY","startZ","axisX","axisY","axisZ","parent_ID","extension_ID","added","UnmodRadius","branch_ID","BranchOrder","PositionInBranch_ID"))
+      }
+    }else{
+      data=data.table::fread(file)
+      if(ncol(data)==17){
+        data=data[,-c(14,15)]
+      }
+      data.table::setnames(data,c("radius","length","startX","startY","startZ","axisX","axisY","axisZ","parent_ID","extension_ID","added","UnmodRadius","branch_ID","BranchOrder","PositionInBranch_ID"))
+
+    }
 
   ####################
   #######Step 1#######
@@ -29,11 +55,29 @@ read_QSM=function(file,model){
   data$endY=data$startY+(data$length*data$axisY) #estimates the coordinates of the end of the cylinders. Y
   data$endZ=data$startZ+(data$length*data$axisZ) #estimates the coordinates of the end of the cylinders. Z
   data$cyl_ID=1:nrow(data)
-  data[-1,c("startX","startY","startZ")]=data[data$parent_ID,c("endX","endY","endZ")] # Replace coordinates of the start of the children by  the end of the parents. AMAPstudio format.
+
+  if(nrow(data[parent_ID==0])>1){
+    lost_segment=nrow(data[parent_ID==0])-1
+
+    branch_2_remove=data[parent_ID==0]$branch_ID[-1]
+    branch_2_remove=unique(c(branch_2_remove,unique(data[parent_ID%in%data[branch_ID%in%branch_2_remove]$cyl_ID]$branch_ID)))
+    branch_2_remove=unique(c(branch_2_remove,unique(data[parent_ID%in%data[branch_ID%in%branch_2_remove]$cyl_ID]$branch_ID)))
+    data=data[!branch_ID%in%branch_2_remove]
+    branch_2_remove=unique(c(branch_2_remove,unique(data[parent_ID%in%data[branch_ID%in%branch_2_remove]$cyl_ID]$branch_ID)))
+    data=data[!branch_ID%in%branch_2_remove]
+
+    data_parent=plyr::adply(data,1,function(x){data[cyl_ID==x$parent_ID]})
+    warning(paste0(length(branch_2_remove)," lost branches (not link to the rest of the tree) were removed"))
+    data[-1,c("startX","startY","startZ")]=data_parent[,c("endX","endY","endZ")] # Replace coordinates of the start of the children by  the end of the parents. AMAPstudio format.
+  }else{
+    data[-1,c("startX","startY","startZ")]=data[data$parent_ID,c("endX","endY","endZ")] # Replace coordinates of the start of the children by  the end of the parents. AMAPstudio format.
+  }
+
+
   data$radius_cyl=0 # Radius of the cylinder
   data[-1,"radius_cyl"]=data[data$parent_ID,"radius"] # The radius of the cylinder is the radius of the start circle i.e the parent. Except when there is a ramification, see below
   data[data$PositionInBranch_ID==1,"radius_cyl"]=data[data$PositionInBranch_ID==1,"radius"] # When a ramification: The radius of the first cylinder of a branch is the radius of the daughter. AMAPstudio format
-
+  # data=data[!branch_ID%in% unique(data[is.na(data$startX)]$branch_ID)]
   ####################
   #######Step 2#######
   ####################
@@ -149,7 +193,11 @@ read_QSM=function(file,model){
   out=data
   out=list(QSM=out,model=model)
 
+  }else{
+    data=data.table::fread(file)
    }
+
+
 
   if(model == "pypetree"){
     # build initial table with the terminal nodes

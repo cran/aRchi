@@ -34,7 +34,7 @@ setMethod("Truncate_QSM",
             ID_Path=radius_cyl=segment_ID=cyl_ID=node_ID=axis_ID=V1=startX=startY=startZ=endX=endY=endZ=NULL
 
             if(is.null(threshold)) stop("Please provide a threshold")
-            if(class(aRchi) != "aRchi") stop("The provided data is not of class aRchi")
+            if(inherits(aRchi,"aRchi")==F) stop("The provided data is not of class aRchi")
             if(is.null(aRchi@QSM)) stop("The archi file does not contains a QSM")
             if(is.null(aRchi@Paths)) stop("The archi file does not contains Paths")
 
@@ -113,22 +113,27 @@ setMethod("Truncate_QSM",
 
               new_segm_ID= unique(TruncatedQSM[node_ID==i]$segment_ID)
               TruncatedQSM[node_ID==i]$axis_ID=unique(TruncatedQSM[segment_ID==i]$axis_ID)
-              TruncatedQSM[node_ID==i]$branching_order=unique(TruncatedQSM[segment_ID==i]$branching_order)
+              TruncatedQSM[node_ID==i]$branching_order=min(TruncatedQSM[segment_ID==i]$branching_order)
               TruncatedQSM[node_ID==i]$node_ID=unique(TruncatedQSM[segment_ID==i]$node_ID)
               TruncatedQSM[segment_ID==i]$segment_ID=new_segm_ID
             }
             if(is.null(aRchi@QSM$Mf)==FALSE){TruncatedQSM=TruncatedQSM[,-c("sub_tree_biomass","Mf","Mf_r")]}
 
             aRchi@QSM=TruncatedQSM
-            if(length(unique(aRchi@QSM$branching_order)>1)){
+            if(length(unique(aRchi@QSM$branching_order))>1){
             aRchi=Make_Path(aRchi)
-            message("\nPaths table has been re-estimated according to the new truncated QSM")}
-            if(length(unique(aRchi@QSM$branching_order)==1)){aRchi@Paths=NULL}
+            message("\nPaths table has been re-estimated according to the new truncated QSM")
             if(is.null(aRchi@Nodes)==FALSE){
-              aRchi=Make_Node(aRchi)
+                aRchi=Make_Node(aRchi)
 
               message("\nNodes table has been re-estimated according to the new truncated QSM")
             }
+
+            }
+            if(length(unique(aRchi@QSM$branching_order))==1){
+              aRchi@Paths=NULL
+            aRchi@Nodes=NULL}
+
 
             if(plotresult){
 
