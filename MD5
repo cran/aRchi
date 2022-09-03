@@ -1,6 +1,6 @@
-207a2599f8e505787cde1d4b8c7d16c2 *DESCRIPTION
+ae8fc99781a9e7649e30490620467626 *DESCRIPTION
 914b272cff931d50a02fc882898248b7 *NAMESPACE
-b13f83a0f4d41375869977908ef3ede8 *NEWS
+cb23b978c0d48ef7e3a6d62d456858c4 *NEWS
 12b6d4c8ac997e8de70983fc916dbb5c *R/BranchAngle.R
 7954e4e1d63a2b5b9b239965f0abbd8f *R/Compute_A0.R
 551da0d69d6f919cfa54ed275fb380f6 *R/Compute_Mf.R
@@ -45,10 +45,10 @@ e5c296711fdb1acee4e529cbf49b8c1b *R/nullOrlist.R
 e7460dd501acbd9f6868d30d3572cf07 *R/read_aRchi.R
 3017b7bbb8cb554bd6f859d3fff6c828 *R/segment_annual_shoots.R
 ee09687dd3a3db51b8ccdf6f89169c44 *R/simplify_skeleton.R
-2ef2db3a92011454bd7cde04df514db0 *R/skeletonize.R
+dadbec987693da499875d5f5cf1cae36 *R/skeletonize.R
 534f644fa215a6332376420ca5133e2b *R/smooth_skeleton.R
 c2a0e9a87c59d31a99951517de1c1744 *R/write_aRchi.R
-daa3bf0308fcf00092013cf6fbc24334 *README.md
+473bec9129ddac5929dd3c9f986f9533 *README.md
 30aa2310f6fd8f2370497170b96b19bb *inst/extdata/Tree_1_TreeQSM.txt
 d67d9c47f7040061b9623b0e63796338 *inst/extdata/Tree_1_aRchi.aRchi
 3f85b20da52b6cdae14db641f3016012 *inst/extdata/Tree_1_point_cloud.las
